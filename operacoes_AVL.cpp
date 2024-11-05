@@ -9,13 +9,18 @@
 // Bibliotecas
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 
 // Classes
-class No
-public:
+/*
+    Cada Nó é um produto dotado de código e sua altura na árvore. Além disso, cada nó possui um ponteiro para o nó pai, um para o nó à esquerda e outro para o nó à direita.
+*/
+class No {
+
     friend class AVL;
 
 private:
+    
     int codigo;
     int altura;
     No *mae;
@@ -23,6 +28,10 @@ private:
     No *dir;
 
 public:
+    
+    /*
+        Construtor de um nó atribuindo o código e altura, além do estado do ponteiro da mãe, filho esquerdo e direito.
+    */
     No(const int codigo) : 
         codigo(codigo), 
         altura(0), 
@@ -31,29 +40,73 @@ public:
         dir(nullptr) 
     {}
 
+    /*
+        Destrutor de um nó.
+    */
+
+    ~No() {
+        delete esq;
+        delete dir;
+    }
+
+    /*
+        Escreve o código do nó com um espaço como separador.
+    */
     void escreve(const char *sep = "") {
-        cout << codigo << sep;
+        
+        std::cout << codigo << sep;
+        
     }
     
+    /*
+        Retorna se o nó é raiz.
+    */
     inline bool eh_raiz() { 
         return mae == nullptr; 
     }
+
+    /*
+        Retorna se o nó é filho direito.
+    */
     inline bool eh_direito() { 
         return mae && mae->dir == this; 
     }
+
+    /*
+        Retorna se o nó é filho esquerdo.
+    */
     inline bool eh_esquerdo() { 
         return mae && mae->esq == this; 
     }
+
+    /*
+        Retorna o fator de balanceamento do nó.
+    */
     inline int bal() {
+
+        // Altura da subárvore esquerda: se a altura não for nula, retorna a altura, senão, retorna -1
         int alt_esq = esq ? esq->altura : -1;
+        
+        // Altura da subárvore direita
         int alt_dir = dir ? dir->altura : -1;
+
+        // Retorna o fator de balanceamento do nó
         return alt_esq - alt_dir;
     }
 
+    /*
+        Atualiza a altura do nó.
+    */
     inline void atualiza_altura() {
+        
+        // Altura da subárvore esquerda
         int alt_esq = esq ? esq->altura : -1;
+        // Altura da subárvore direita
         int alt_dir = dir ? dir->altura : -1;
+
+        // Atualiza a altura do nó
         altura = 1 + (alt_esq > alt_dir ? alt_esq : alt_dir);
+            // Se a altura da subárvore esquerda for maior que a da direita, a altura do nó é a da esquerda mais 1, senão, a da direita mais 1
     }
 
 };
@@ -61,8 +114,54 @@ public:
 class AVL
 {
 private:
+    
     No *raiz;
     
+    void insere(int codigo) {
+        No *z = new No(codigo);
+        insere(z);
+    }   
+
+    void insere(No *z) {
+        No *y = nullptr;
+        No *x = raiz;
+
+        while (x != nullptr) {
+            y = x;
+            if (z->codigo < x->codigo) 
+                x = x->esq;
+            else 
+                x = x->dir;
+        }
+
+        z->mae = y;
+        if (y == nullptr) 
+            raiz = z;
+        else 
+            if (z->codigo < y->codigo) 
+                y->esq = z;
+            else 
+                y->dir = z;
+
+        // Atualização dos fatores de balanceamento
+        if (z->eh_raiz())
+            return;
+        
+        do { // o laço inicia subindo imediatamente para o pai do nó inserido
+            z = z->mae;
+            z = ajusta_balanceamento(z, true);
+        } while (!z->eh_raiz() and z->bal() != 0);
+    }
+    
+    No *busca(No *x, int k) {
+        if (x == nullptr || x->codigo == k
+            return x;
+        if (k < x->codigo) 
+            return busca(x->esq, k);
+        else
+            return busca(x->dir, k);
+    };
+
     void escreve(const string &prefixo, No *x) {
         if (x != nullptr) {
             cout << prefixo;
@@ -73,14 +172,6 @@ private:
         }
     }
 
-    No *busca(No *x, int k) {
-        if (x == nullptr || x->codigo == k
-            return x;
-        if (k < x->codigo) 
-            return busca(x->esq, k);
-        else
-            return busca(x->dir, k);
-    }
 
     No *minimo() {
         // Encontra o menor valor em toda a árvore
@@ -156,41 +247,6 @@ private:
         return p;
     }
     
-    void insere(int codigo) {
-        No *z = new No(codigo);
-        insere(z);
-    }   
-
-    void insere(No *z) {
-        No *y = nullptr;
-        No *x = raiz;
-
-        while (x != nullptr) {
-            y = x;
-            if (z->codigo < x->codigo) 
-                x = x->esq;
-            else 
-                x = x->dir;
-        }
-
-        z->mae = y;
-        if (y == nullptr) 
-            raiz = z;
-        else 
-            if (z->codigo < y->codigo) 
-                y->esq = z;
-            else 
-                y->dir = z;
-
-        // Atualização dos fatores de balanceamento
-        if (z->eh_raiz())
-            return;
-        
-        do { // o laço inicia subindo imediatamente para o pai do nó inserido
-            z = z->mae;
-            z = ajusta_balanceamento(z, true);
-        } while (!z->eh_raiz() and z->bal() != 0);
-    }
     bool remove(int codigo) {
         No *z = busca(raiz, codigo);
         if (z == NULL)
@@ -350,21 +406,66 @@ public:
 };
 
 
-
 int main(void)
 {
-
+    // Criação de dois Bancos de Dados AVL
     AVL T1, T2;
 
+    // Conjunto de códigos de produtos
     int v1[] = {33, 5, 10, 21, 20, 23, 18, 16, 19, 15, 17, 22, 14};
-
     int v2[] = {3, 0, 10, 21, 20, 23, 18, 16, 19, 15, 25, 26, 13};
 
-    /* Operações Básicas */
-    // Insere elementos de v1 em T1
-    /* Operações Avançadas */
+    /* 
+        Operações Básicas 
+    */
+    // Insere produtos de v1 em T1
+    printf("## Inserção de produtos\n\n");
+    printf("T1:\n");
+    for (const auto &x : v1) {
+        printf("\nInserindo %d...\n", x);
+        T1.insere(x); // Inicialmente, sem balanceamento
+        printf("T:\n");
+        T1.escreve();
+    }
+
+    // Busca de produtos em T1
+    printf("\n## Busca de produtos\n\n");
+    int valor_busca;
+
+    printf("Insira um valor para buscar na árvore T1: ");
+    scanf("%d", &valor_busca);
+
+    printf("Buscando %d...\n", valor_busca);
+    No *n = T1.busca(valor_busca);
+    if (n != nullptr) {
+        printf("Encontrado: ");
+        n->escreve("\n");
+    } else {
+        printf("Não encontrado.\n");
+    }
+
+    // Remove produtos de v1 em T1
+    printf("\n## Remoção de produtos\n\n");
+    printf("T1:\n");
+    T1.escreve();
+    for (const auto &x : v1) {
+        printf("\nRemovendo %d...\n", x);
+        T1.remove(x);
+        printf("T:\n");
+        T1.escreve();
+    }
+    
+    /* 
+        Operações Avançadas 
+    */
     // União de T1 e T2
+    
+    
     // Interseção de T1 e T2
+    
+    
     // Busca de elementos em um intervalo de T1 ou T2
+    
+    
     return 0;
 }
