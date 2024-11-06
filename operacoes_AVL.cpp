@@ -10,17 +10,25 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
+#include <string>
 
 // Classes
-/*
-    Cada Nó é um produto dotado de código e sua altura na árvore. Além disso, cada nó possui um ponteiro para o nó pai, um para o nó à esquerda e outro para o nó à direita.
-*/
+
+/**
+ * @class No
+ * @brief Classe que representa um nó em uma árvore AVL.
+ * 
+ * A classe No encapsula os atributos e métodos necessários para a manipulação de um nó em uma árvore AVL,
+ * incluindo a gestão de seus filhos, altura e fator de balanceamento. 
+ */
 class No {
 
     friend class AVL;
 
+/**
+ * @brief Cada Nó é um produto dotado de código e sua altura na árvore. Além disso, cada nó possui um ponteiro para o nó pai, um para o nó à esquerda e outro para o nó à direita.
+ */
 private:
-    
     int codigo;
     int altura;
     No *mae;
@@ -29,9 +37,10 @@ private:
 
 public:
     
-    /*
-        Construtor de um nó atribuindo o código e altura, além do estado do ponteiro da mãe, filho esquerdo e direito.
-    */
+    /**
+     * @brief Construtor de um nó atribuindo o código e altura, além do estado do ponteiro da mãe, filho esquerdo e direito.
+     * @param codigo Código do nó.
+     */
     No(const int codigo) : 
         codigo(codigo), 
         altura(0), 
@@ -40,39 +49,45 @@ public:
         dir(nullptr) 
     {}
 
-    /*
-        Escreve o código do nó com um espaço como separador.
-    */
+    /**
+     * @brief Escreve o código do nó com um espaço como separador padrão.
+     * @param sep Separador a ser utilizado após o código do nó.
+     */
     void escreve(const char *sep = "") {
         
         std::cout << codigo << sep;
         
     }
     
-    /*
-        Retorna se o nó é raiz.
-    */
+
+    /**
+     * @brief Retorna se o nó é raiz.
+     * @return true se o nó é raiz, false caso contrário.
+     */
     inline bool eh_raiz() { 
         return mae == nullptr; 
     }
 
-    /*
-        Retorna se o nó é filho direito.
-    */
+    /**
+     * @brief Retorna se o nó é filho direito.
+     * @return true se o nó é filho direito, false caso contrário.
+     */
     inline bool eh_direito() { 
         return mae && mae->dir == this; 
     }
 
-    /*
-        Retorna se o nó é filho esquerdo.
-    */
+    /**
+     * @brief Retorna se o nó é filho esquerdo.
+     * @return true se o nó é filho esquerdo, false caso contrário.
+     */
     inline bool eh_esquerdo() { 
         return mae && mae->esq == this; 
     }
 
-    /*
-        Retorna o fator de balanceamento do nó.
-    */
+    /**
+     * @brief Retorna o fator de balanceamento do nó.
+     * @return Fator de balanceamento do nó.
+     */
     inline int bal() {
 
         // Altura da subárvore esquerda: se a altura não for nula, retorna a altura, senão, retorna -1
@@ -85,9 +100,9 @@ public:
         return alt_esq - alt_dir;
     }
 
-    /*
-        Atualiza a altura do nó.
-    */
+    /**
+     * @brief Atualiza a altura do nó.
+     */
     inline void atualiza_altura() {
         
         // Altura da subárvore esquerda
@@ -102,13 +117,27 @@ public:
 
 };
 
+/**
+ * @class AVL
+ * @brief Classe que representa uma árvore AVL (árvore binária de busca auto-balanceada).
+ * 
+ * A árvore AVL mantém seu balanceamento realizando rotações durante inserções e remoções.
+ * Isso garante que a árvore permaneça balanceada, proporcionando complexidade de tempo O(log n) para operações de busca, inserção e remoção.
+ */
 class AVL
 {
 private:
     
-    No *raiz;
+    No *raiz; ///< Ponteiro para o nó raiz da árvore AVL.
 
+    /**
+     * @brief Insere um nó na árvore AVL.
+     * 
+     * @param z Ponteiro para o nó a ser inserido.
+     */
     void insere(No *z) {
+        
+        
         No *y = nullptr;
         No *x = raiz;
 
@@ -133,13 +162,21 @@ private:
         if (z->eh_raiz())
             return;
         
-        do { // o laço inicia subindo imediatamente para o pai do nó inserido
+        do { // o laço inicia subindo imediatamente para a mãe do nó inserido
             z = z->mae;
             z = ajusta_balanceamento(z, true);
         } while (!z->eh_raiz() and z->bal() != 0);
-    }
-    
+    };
+
+    /**
+     * @brief Busca um nó com uma chave específica na árvore AVL.
+     * 
+     * @param x Ponteiro para o nó de onde a busca começa.
+     * @param k A chave a ser buscada.
+     * @return Ponteiro para o nó com a chave especificada, ou nullptr se não encontrado.
+     */
     No *busca(No *x, int k) {
+        
         if (x == nullptr || x->codigo == k)
             return x;
         if (k < x->codigo) 
@@ -147,120 +184,157 @@ private:
         else
             return busca(x->dir, k);
     };
-  
-    /*
-        Encontra o menor valor a partir de um nó específico.
-    */
+
+    /**
+     * @brief Encontra o nó com a menor chave a partir de um nó específico.
+     * 
+     * @param x Ponteiro para o nó de onde a busca começa.
+     * @return Ponteiro para o nó com a chave mínima.
+     */
     No *minimo(No *x) {
         while (x->esq != nullptr) 
             x = x->esq;
         return x;
     };
 
-    /*
-        Encontra o maior valor a partir de um nó específico.
-    */
+    /**
+     * @brief Encontra o nó com a maior chave a partir de um nó específico.
+     * 
+     * @param x Ponteiro para o nó de onde a busca começa.
+     * @return Ponteiro para o nó com a chave máxima.
+     */
     No *maximo(No *x) {
         while (x->dir != nullptr) 
             x = x->dir;
         return x;
     };
 
-    /* 
-        Transplanta v para u.     
-    */
+    /**
+     * @brief Transplanta uma subárvore enraizada no nó v para a posição do nó u.
+     * 
+     * @param u Ponteiro para o nó a ser substituído.
+     * @param v Ponteiro para o nó que substituirá u.
+     */
     void transplante(No *u, No *v) {
-        if (u->mae == nullptr) 
+        
+        if (u->eh_raiz()) 
             raiz = v;
+        else if (u->eh_esquerdo()) 
+            u->mae->esq = v;
         else 
-            if (u == u->mae->esq) 
-                u->mae->esq = v;
-            else 
-                u->mae->dir = v;
+            u->mae->dir = v;
         
         if (v != nullptr) 
             v->mae = u->mae;
-    }
+    };
 
-    /*
-        Ajusta o balanceamento da árvore.
-    */
+    /**
+     * @brief Ajusta o balanceamento da árvore AVL após inserção ou remoção.
+     * 
+     * @param p Ponteiro para o nó de onde o ajuste de balanceamento começa.
+     * @param girou Booleano indicando se uma rotação ocorreu.
+     * @return Ponteiro para o nó após o ajuste de balanceamento.
+     */
     No *ajusta_balanceamento(No *p, bool girou) {
         
+        // Atualiza a altura do nó
         p->atualiza_altura();
         
+        // Obtém o balanceamento do nó
         int balance = p->bal();
 
-        // Caso 1: Rotação à direita
+        // Caso 1: Se o balanceamento for 2, o nó está desbalanceado para a direita | Rotação à direita ou dupla à direita.
         if (balance == 2) {
-            if (p->esq->bal() >= 0) {
-                // Caso 1.1: 
+
+            // Se o fator de balanceamento do filho esquerdo for maior ou igual a zero
+            if (p->esq->bal() >= 0) { 
+                
+                // Caso 1.1: Rotação à direita  
                 if (girou) 
                     std::cout << ">> Rotação direita (Caso 1.1)\n";
                 rotacao_dir(p);
-            } else {
+
+            } else { // Se o fator de balanceamento do filho esquerdo for menor que zero
+                
                 // Caso 1.2: Rotação dupla direita
                 if (girou) 
                     std::cout << ">> Rotação dupla direita (Caso 1.2)\n";
                 rotacao_dupla_dir(p);
+
             }
+            
+            // Atualiza o nó mãe
             p = p->mae;
-        } else 
+
+        } else
+            
+            // Caso 2: Se o balanceamento for -2, o nó está desbalanceado para a esquerda | Rotação à esquerda ou dupla à esquerda.
             if (balance == -2) {
-                // Caso 2: Rotação à esquerda
+                
+                // Se o fator de balanceamento do filho direito for menor ou igual a zero
                 if (p->dir->bal() <= 0) {
+
                     // Caso 2.1: Rotação à esquerda
                     if (girou) 
                         std::cout << ">> Rotação esquerda (Caso 2.1)\n";
                     rotacao_esq(p);
-                } else {
+                
+                } else { // Se o fator de balanceamento do filho direito for maior que zero
+                    
                     // Caso 2.2: Rotação dupla esquerda
                     if (girou) 
                         std::cout << ">> Rotação dupla esquerda (Caso 2.2)\n";
                     rotacao_dupla_esq(p);
                 }
+                // Atualiza o nó mãe
                 p = p->mae;
             }
-
-        return p;
-    }
-    
-    /*
-        Remove um nó da árvore.
-    */
-    void remove(No *z) {
-        No *p = NULL;
         
-        if (z->esq == NULL) { 
+        // Retorna o nó após o ajuste de balanceamento
+        return p;
+    };
+
+    /**
+     * @brief Remove um nó da árvore AVL.
+     * 
+     * @param z Ponteiro para o nó a ser removido.
+     */
+    void remove(No *z) {
+        
+        
+        No *p = nullptr;
+        
+        if (z->esq == nullptr) { 
 
             p = z->mae; 
             transplante(z, z->dir);
         }
         else {
-            if (z->dir == NULL) { 
-            printf("<< Remoção 2o caso\n");
-            p = z->mae; 
-            transplante(z, z->esq);
+            
+            if (z->dir == nullptr) { 
+                printf("<< Remoção 2o caso\n");
+                p = z->mae; 
+                transplante(z, z->esq);
             }
             else { 
-            No *y = minimo(z->dir);
+                No *y = minimo(z->dir);
             
-            printf("<< Remoção 3o caso (a) ");
-            if (y->mae != z) { 
-            printf("+ (b)\n");
-                p = y->mae; 
-                transplante(y, y->dir); 
-                y->dir = z->dir;
-                y->dir->mae = y;
-            }
-            printf("\n");
+                printf("<< Remoção 3o caso (a) ");
+                if (y->mae != z) { 
+                    printf("+ (b)\n");
+                    p = y->mae; 
+                    transplante(y, y->dir); 
+                    y->dir = z->dir;
+                    y->dir->mae = y;
+                }
+                printf("\n");
             
-            transplante(z, y); // (a)
-            y->esq = z->esq;
-            y->esq->mae = y;
+                transplante(z, y); // (a)
+                y->esq = z->esq;
+                y->esq->mae = y;
 
-            if (p == NULL) 
-                p = y;
+                if (p == nullptr) 
+                    p = y;
             }
         }
 
@@ -275,35 +349,42 @@ private:
             p = p->mae;
             p = ajusta_balanceamento(p, false);
         }
-    }
-    
-    /*
-        Limpa a árvore a partir de um nó x.
-    */
-    void limpa(No *x){
+    };
+
+    /**
+     * @brief Limpa a árvore AVL a partir de um nó específico.
+     * 
+     * @param x Ponteiro para o nó de onde a limpeza começa.
+     */
+    void limpa(No *x) {
         if (x == NULL)
             return;
 
-        limpa(No *x->esq);
-        limpa(No *x->dir);
+        limpa(x->esq);
+        limpa(x->dir);
         delete x;
-    }; // dado um nó x, remove recursivamente todos elementos abaixo e deleta x
-    
-    /*
-        Copia uma árvore T para a atual a partir da raiz.
-    */
-    void copia(const AVL& T){
-        if (T.raiz == NULL)
-            raiz = NULL;
+    };
+
+    /**
+     * @brief Copia uma árvore AVL para a árvore atual a partir da raiz.
+     * 
+     * @param T Referência para a árvore AVL a ser copiada.
+     */
+    void copia(const AVL& T) {
+        if (T.raiz == nullptr)
+            raiz = nullptr;
         else {
             raiz = new No(T.raiz->codigo);
             copia(raiz, T.raiz);
         }
-    }; 
-    
-    /*
-        Copia um nó de origem para um nó de destino.
-    */
+    };
+
+    /**
+     * @brief Copia uma subárvore de um nó de origem para um nó de destino.
+     * 
+     * @param dest Ponteiro para o nó de destino.
+     * @param orig Ponteiro para o nó de origem.
+     */
     void copia(No *dest, No *orig) {
         if (orig->esq) {
             dest->esq = new No(orig->esq->codigo);
@@ -316,72 +397,101 @@ private:
             dest->dir->mae = dest;
             copia(dest->dir, orig->dir);
         }
-    }
+    };
 
-    /*
-        Rotação à direita.
-    */
+    /**
+     * @brief Realiza uma rotação à direita em um nó específico.
+     * 
+     * @param p Ponteiro para o nó a ser rotacionado.
+     */
     void rotacao_dir(No *p) {
+        
         No *u = p->esq;
-        // arruma u e seu pai (o pai de p)
+        
+        // arruma u e sua mãe (a mãe de p)
         transplante(p, u);
+        
         // move p para a direita de u, e o filho direito de u para a esquerda de p
         p->mae = u;
         p->esq = u->dir;
         u->dir = p;
-        if (p->esq) p->esq->mae = p;
+        
+        if (p->esq) {
+            // arruma a mãe do filho esquerdo de p
+            p->esq->mae = p;
+        }
+
         // atualiza alturas
         p->atualiza_altura();
         u->atualiza_altura();
-    }
+    };
 
-    /*
-        Rotação à esquerda.
-    */
+    /**
+     * @brief Realiza uma rotação à esquerda em um nó específico.
+     * 
+     * @param p Ponteiro para o nó a ser rotacionado.
+     */
     void rotacao_esq(No *p) {
+        
         No *u = p->dir;
-        // arruma u e seu pai (o pai de p)
+        
+        // arruma u e sua mãe (a mãe de p)
         transplante(p, u);
+
         // move p para a esquerda de u, e o filho esquerdo de u para a direita de p
         p->mae = u;
         p->dir = u->esq;
         u->esq = p;
-        if (p->dir) p->dir->mae = p;
+        
+        if (p->dir) { 
+            p->dir->mae = p;
+        };
+
         // atualiza alturas
         p->atualiza_altura();
         u->atualiza_altura();
-    }
+    };
 
-    /*
-        Rotação dupla à direita.
-    */
+    /**
+     * @brief Realiza uma rotação dupla à direita em um nó específico.
+     * 
+     * @param p Ponteiro para o nó a ser rotacionado.
+     */
     void rotacao_dupla_dir(No *p) {
         rotacao_esq(p->esq);
         rotacao_dir(p);
-    }
+    };
 
-    /*
-        Rotação dupla à esquerda.
-    */
+    /**
+     * @brief Realiza uma rotação dupla à esquerda em um nó específico.
+     * 
+     * @param p Ponteiro para o nó a ser rotacionado.
+     */
     void rotacao_dupla_esq(No *p) {
         rotacao_dir(p->dir);
         rotacao_esq(p);
-    }
+    };
 
-    /*
-        União de duas árvores AVL.
-    */
+    /**
+     * @brief Une duas árvores AVL.
+     * 
+     * @param x Ponteiro para o nó raiz da árvore a ser unida.
+     */
     void uniao(No *x) {
         if (x != nullptr) {
             insere(x->codigo);  // Insere o código do nó atual na árvore AVL
             uniao(x->esq);      // Chama recursivamente para o filho esquerdo
             uniao(x->dir);      // Chama recursivamente para o filho direito
         }
-    }
+    };
 
-    /*
-        Interseção de duas árvores AVL.
-    */
+    /**
+     * @brief Intersecciona duas árvores AVL e armazena o resultado em uma terceira árvore.
+     * 
+     * @param x Ponteiro para o nó raiz da primeira árvore.
+     * @param T2 Referência para a segunda árvore AVL.
+     * @param resultado Referência para a árvore AVL onde o resultado será armazenado.
+     */
     void intersecao(No *x, AVL &T2, AVL &resultado) {
         if (x != nullptr) {
             if (T2.busca(x->codigo) != nullptr) 
@@ -390,12 +500,17 @@ private:
             intersecao(x->esq, T2, resultado);
             intersecao(x->dir, T2, resultado);
         }
-    }
+    };
 
-    /*
-        Busca de elementos em um intervalo de códigos.
-    */
+    /**
+     * @brief Busca elementos dentro de um intervalo de chaves.
+     * 
+     * @param x Ponteiro para o nó de onde a busca começa.
+     * @param min O valor mínimo da chave.
+     * @param max O valor máximo da chave.
+     */
     void busca_intervalo(No *x, int min, int max) {
+        
         if (x == nullptr) return;
 
         if (x->codigo >= min && x->codigo <= max) {
@@ -404,117 +519,236 @@ private:
         
         if (x->codigo > min) busca_intervalo(x->esq, min, max);
         if (x->codigo < max) busca_intervalo(x->dir, min, max);
+    };
+
+    /**
+     * @brief Copia uma string para outra.
+     * @param destino Ponteiro para a string de destino.
+     * @param origem Ponteiro para a string de origem.
+     */
+    void copia_string(char* destino, const char* origem) const {
+        while (*origem) {
+            *destino++ = *origem++;
+        }
+        *destino = '\0';
     }
 
-    /*
-        Escreve a árvore AVL.
-    */
-    void escreve(const string &prefixo, No *x) {
-        if (x != nullptr) {
-            std::cout << prefixo;
-            std::cout << (x->eh_raiz() ? "Raiz -> " : "-> ");
-            x->escreve("\n");
-            escreve(prefixo + "   ", x->esq);
-            escreve(prefixo + "   ", x->dir);
+    /**
+     * @brief Concatena uma string a outra.
+     * @param destino Ponteiro para a string de destino.
+     * @param origem Ponteiro para a string de origem.
+     */
+    void concatena_string(char* destino, const char* origem) const {
+        while (*destino) {
+            destino++;
         }
+        copia_string(destino, origem);
     }
+    
 
 public:
-    // Construtor
+    /**
+     * @brief Construtor padrão para a árvore AVL.
+     */
     AVL();
-    // Construtor de cópia
-    AVL(const AVL& outro){
+
+    /**
+     * @brief Construtor de cópia para a árvore AVL.
+     * 
+     * @param outro Referência para a árvore AVL a ser copiada.
+     */
+    AVL(const AVL& outro) {
         copia(outro);
     };
-    
-    // Destrutor 
+
+    /**
+     * @brief Destrutor para a árvore AVL.
+     */
     ~AVL();
 
-    // Operador de atribuição
-    AVL& operator=(const AVL& outro){
+    /**
+     * @brief Operador de atribuição para a árvore AVL.
+     * 
+     * @param outro Referência para a árvore AVL a ser atribuída.
+     * @return Referência para a árvore AVL atribuída.
+     */
+    AVL& operator=(const AVL& outro) {
         limpa();
         copia(outro);
         return *this;
     };
 
-    No *get_raiz(){
+    /**
+     * @brief Obtém o nó raiz da árvore AVL.
+     * 
+     * @return Ponteiro para o nó raiz.
+     */
+    No *get_raiz() {
         return raiz;
-    };         
-    
+    };
+
+    /**
+     * @brief Busca um nó com uma chave específica na árvore AVL.
+     * 
+     * @param k A chave a ser buscada.
+     * @return Ponteiro para o nó com a chave especificada, ou nullptr se não encontrado.
+     */
     No *busca(int k) {
         return busca(raiz, k);
-    }
+    };
 
+    /**
+     * @brief Encontra o nó com a chave mínima na árvore AVL.
+     * 
+     * @return Ponteiro para o nó com a chave mínima.
+     */
     No *minimo() {
-        return raiz ? minimo(raiz) : nullptr;
-    }           
-    
+        return minimo(raiz);
+    };
+
+    /**
+     * @brief Encontra o nó com a chave máxima na árvore AVL.
+     * 
+     * @return Ponteiro para o nó com a chave máxima.
+     */
     No *maximo() {
-       return raiz ? maximo(raiz) : nullptr;
-    }   
+        return maximo(raiz);
+    };
 
-    No *sucessor(No *x){
-        if (x->dir != NULL)
+    /**
+     * @brief Encontra o sucessor de um nó específico.
+     * 
+     * @param x Ponteiro para o nó cujo sucessor será encontrado.
+     * @return Ponteiro para o nó sucessor.
+     */
+    No *sucessor(No *x) {
+        if (x->dir != nullptr) 
             return minimo(x->dir);
+        
         No *y = x->mae;
-        while (y != NULL && x == y->dir) {
+        while (y != nullptr && x == y->dir) {
             x = y;
             y = y->mae;
         }
         return y;
-    };    
+    };
 
-    No *predecessor(No *x){
-        if (x->esq != NULL)
+    /**
+     * @brief Encontra o predecessor de um nó específico.
+     * 
+     * @param x Ponteiro para o nó cujo predecessor será encontrado.
+     * @return Ponteiro para o nó predecessor.
+     */
+    No *predecessor(No *x) {
+        if (x->esq != nullptr) 
             return maximo(x->esq);
+        
         No *y = x->mae;
-        while (y != NULL && x == y->esq) {
+        while (y != nullptr && x == y->esq) {
             x = y;
             y = y->mae;
         }
         return y;
-    }; 
+    };
 
+    /**
+     * @brief Insere um nó com uma chave específica na árvore AVL.
+     * 
+     * @param codigo A chave do nó a ser inserido.
+     */
     void insere(int codigo) {
         No *z = new No(codigo);
         insere(z);
-    }   
+    };
 
+    /**
+     * @brief Remove um nó com uma chave específica da árvore AVL.
+     * 
+     * @param codigo A chave do nó a ser removido.
+     * @return True se o nó foi removido, false caso contrário.
+     */
     bool remove(int codigo) {
-        No *z = busca(raiz, codigo);
-        if (z == NULL)
+        No *z = busca(codigo);
+        if (z == nullptr) 
             return false;
-
+        
         remove(z);
-        delete z;
         return true;
-    } 
-    
+    };
+
+    /**
+     * @brief Limpa a árvore AVL.
+     */
     void limpa() {
         limpa(raiz);
-        raiz = NULL;
-    }     
+        raiz = nullptr;
+    };
 
+    /**
+     * @brief Une a árvore AVL atual com outra árvore AVL.
+     * 
+     * @param T Referência para a árvore AVL a ser unida.
+     */
     void uniao(AVL &T) {
-        uniao(T.raiz);  // Chama a função auxiliar iniciando pela raiz da árvore T
-    }
+        uniao(T.raiz);
+    };
 
+    /**
+     * @brief Intersecciona duas árvores AVL e armazena o resultado em uma terceira árvore.
+     * 
+     * @param T1 Referência para a primeira árvore AVL.
+     * @param T2 Referência para a segunda árvore AVL.
+     * @param resultado Referência para a árvore AVL onde o resultado será armazenado.
+     */
     void intersecao(AVL &T1, AVL &T2, AVL &resultado) {
         intersecao(T1.raiz, T2, resultado);
-    }
+    };
 
+    /**
+     * @brief Busca elementos dentro de um intervalo de chaves.
+     * 
+     * @param min O valor mínimo da chave.
+     * @param max O valor máximo da chave.
+     */
     void busca_intervalo(int min, int max) {
         busca_intervalo(raiz, min, max);
-    }   
+    };
 
-    void escreve(){
-        escreve("", raiz);
+    /**
+     * @brief Escreve a árvore AVL na saída padrão.
+     * 
+     * @param prefixo A string de prefixo para formatar a saída.
+     * @param x Ponteiro para o nó de onde a escrita começa.
+     */
+    void escreve(const char* prefixo = "", No* x = nullptr, bool isLeft = true) const {
+        if (x != nullptr) {
+            std::cout << prefixo;
+            std::cout << (isLeft ? "├── " : "└── ");
+            x->escreve("\n");
+
+            // Cria novos prefixos para os filhos esquerdo e direito
+            char novoPrefixoEsq[100];
+            char novoPrefixoDir[100];
+
+            copia_string(novoPrefixoEsq, prefixo);
+            copia_string(novoPrefixoDir, prefixo);
+
+            if (isLeft) {
+                concatena_string(novoPrefixoEsq, "│   ");
+                concatena_string(novoPrefixoDir, "    ");
+            } else {
+                concatena_string(novoPrefixoEsq, "    ");
+                concatena_string(novoPrefixoDir, "    ");
+            }
+
+            escreve(novoPrefixoEsq, x->esq, true);
+            escreve(novoPrefixoDir, x->dir, false);
+        }
     };
 };
 
+int main(void) {
 
-int main(void)
-{
     // Criação de três Bancos de Dados AVL
     AVL T1, T2, intersecao_T1_T2;
 
@@ -530,73 +764,73 @@ int main(void)
     printf("T1:\n");
     for (const auto &x : v1) {
         printf("\nInserindo %d...\n", x);
-        T1.insere(x); // Inicialmente, sem balanceamento
+        T1.insere(x); 
         printf("T:\n");
-        T1.escreve();
+        T1.escreve("", T1.get_raiz());
     }
 
     // Busca de produtos em T1
-    printf("\n## Busca de produtos\n\n");
-    int valor_busca;
+    // printf("\n## Busca de produtos\n\n");
+    // int valor_busca;
 
-    printf("Insira um valor para buscar na árvore T1: ");
-    scanf("%d", &valor_busca);
+    // printf("Insira um valor para buscar na árvore T1: ");
+    // scanf("%d", &valor_busca);
 
-    printf("Buscando %d...\n", valor_busca);
-    No *n = T1.busca(valor_busca);
-    if (n != nullptr) {
-        printf("Encontrado: ");
-        n->escreve("\n");
-    } else {
-        printf("Não encontrado.\n");
-    }
+    // printf("Buscando %d...\n", valor_busca);
+    // No *n = T1.busca(valor_busca);
+    // if (n != nullptr) {
+    //     printf("Encontrado: ");
+    //     n->escreve("\n");
+    // } else {
+    //     printf("Não encontrado.\n");
+    // }
 
-    // Remove produtos de v1 em T1
-    printf("\n## Remoção de produtos\n\n");
-    printf("T1:\n");
-    T1.escreve();
-    for (const auto &x : v1) {
-        printf("\nRemovendo %d...\n", x);
-        T1.remove(x);
-        printf("T:\n");
-        T1.escreve();
-    }
+    // // Remove produtos de v1 em T1
+    // printf("\n## Remoção de produtos\n\n");
+    // printf("T1:\n");
+    // T1.escreve();
+    // for (const auto &x : v1) {
+    //     printf("\nRemovendo %d...\n", x);
+    //     T1.remove(x);
+    //     printf("T:\n");
+    //     T1.escreve("", T1.get_raiz());
+    // }
     
-    /* 
-        Operações Avançadas 
-    */
-    // União de T1 e T2
-    printf("\n## União de T1 e T2\n\n");
-    printf("T1:\n");
-    T1.escreve();
-    printf("T2:\n");
-    T2.escreve();
-    printf("T1 U T2:\n");
-    T1.uniao(T2);  // Une T2 em T1
-    T1.escreve();  // Imprime T1 com a união
+    // /* 
+    //     Operações Avançadas 
+    // */
+    // // União de T1 e T2
+    // printf("\n## União de T1 e T2\n\n");
+    // printf("T1:\n");
+    // T1.escreve("", T1.get_raiz());
+    // printf("T2:\n");
+    // T2.escreve("", T2.get_raiz());
+    // printf("T1 U T2:\n");
+    // T1.uniao(T2);  // Une T2 em T1
+    // T1.escreve("", T1.get_raiz());  // Imprime T1 com a união
     
-    // Interseção de T1 e T2
-    printf("\n## Interseção de T1 e T2\n\n");
-    printf("T1:\n");
-    T1.escreve();
-    printf("T2:\n");
-    T2.escreve();
-    printf("T1 ∩ T2:\n");
-    intersecao_T1_T2.intersecao(T1, T2, intersecao_T1_T2);
-    intersecao_T1_T2.escreve();  // Imprime a árvore resultante da interseção   
+    // // Interseção de T1 e T2
+    // printf("\n## Interseção de T1 e T2\n\n");
+    // printf("T1:\n");
+    // T1.escreve("", T1.get_raiz());
+    // printf("T2:\n");
+    // T2.escreve("", T2.get_raiz());
+    // printf("T1 ∩ T2:\n");
+    // intersecao_T1_T2.intersecao(T1, T2, intersecao_T1_T2);
+    // intersecao_T1_T2.escreve("", intersecao_T1_T2.get_raiz());  // Imprime a árvore resultante da interseção   
     
-    // Busca de elementos em um intervalo de T1 ou T2
-    printf("\n## Busca de produtos em um intervalo de T2\n\n");
-    int valor_min, valor_max;
+    // // Busca de elementos em um intervalo de T1 ou T2
+    // printf("\n## Busca de produtos em um intervalo de T2\n\n");
+    // int valor_min, valor_max;
 
-    printf("Insira um valor mínimo para buscar na árvore T2: ");
-    scanf("%d\n", &valor_min);
-    printf("Insira um valor máximo para buscar na árvore T2: ");
-    scanf("%d\n", &valor_max);
+    // printf("Insira um valor mínimo para buscar na árvore T2: ");
+    // scanf("%d\n", &valor_min);
+    // printf("Insira um valor máximo para buscar na árvore T2: ");
+    // scanf("%d\n", &valor_max);
 
-    printf("\nBuscando intervalo [%d, %d]...\n", valor_min, valor_max);
-    printf("T2:\n");
-    T2.busca_intervalo(valor_min, valor_max);
+    // printf("\nBuscando intervalo [%d, %d]...\n", valor_min, valor_max);
+    // printf("T2:\n");
+    // T2.busca_intervalo(valor_min, valor_max);
     
     return 0;
 }
