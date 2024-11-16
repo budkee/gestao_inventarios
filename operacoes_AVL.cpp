@@ -8,8 +8,9 @@
 
 // Bibliotecas
 #include <iostream>
-#include <cstdlib>
-#include <cstdio>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
 // Classes
 
@@ -473,14 +474,19 @@ private:
 
     /**
      * @brief Une duas árvores AVL.
-     * 
+     *
      * @param x Ponteiro para o nó raiz da árvore a ser unida.
+     * @param destino Referência para a árvore AVL onde o resultado será armazenado.
      */
-    void uniao(No *x) {
-        if (x != nullptr) {
-            insere(x->codigo);  // Insere o código do nó atual na árvore AVL
-            uniao(x->esq);      // Chama recursivamente para o filho esquerdo
-            uniao(x->dir);      // Chama recursivamente para o filho direito
+    void uniao(No *x, AVL &destino)
+    {
+        if (x != nullptr)
+        {
+            // Insere o código do nó atual na árvore de destino
+            destino.insere(x->codigo);
+            // Chama recursivamente para o filho esquerdo e direito
+            uniao(x->esq, destino);
+            uniao(x->dir, destino);
         }
     };
 
@@ -489,15 +495,15 @@ private:
      * 
      * @param x Ponteiro para o nó raiz da primeira árvore.
      * @param T2 Referência para a segunda árvore AVL.
-     * @param resultado Referência para a árvore AVL onde o resultado será armazenado.
+     * @param T3 Referência para a árvore AVL onde o resultado será armazenado.
      */
-    void intersecao(No *x, AVL &T2, AVL &resultado) {
+    void intersecao(No *x, AVL &T2, AVL &T3) {
         if (x != nullptr) {
             if (T2.busca(x->codigo) != nullptr) 
-                resultado.insere(x->codigo);
+                T3.insere(x->codigo);
             
-            intersecao(x->esq, T2, resultado);
-            intersecao(x->dir, T2, resultado);
+            intersecao(x->esq, T2, T3);
+            intersecao(x->dir, T2, T3);
         }
     };
 
@@ -510,14 +516,26 @@ private:
      */
     void busca_intervalo(No *x, int min, int max) {
         
-        if (x == nullptr) return;
+        // Verifica se existe um nó
+        if (x == nullptr) {
+            return;
+        }
 
+        
+        // Verifica se o nó à esquerda está dentro do intervalo
+        if (x->codigo > min) {
+            busca_intervalo(x->esq, min, max);
+        }
+
+        // Percorre nó por nó e verifica se ele está dentro do intervalo, caso esteja, imprime o código
         if (x->codigo >= min && x->codigo <= max) {
             x->escreve("\n");
         }
-        
-        if (x->codigo > min) busca_intervalo(x->esq, min, max);
-        if (x->codigo < max) busca_intervalo(x->dir, min, max);
+
+        // Verifica se o nó à direita está dentro do intervalo
+        if (x->codigo < max) {
+            busca_intervalo(x->dir, min, max);
+        }
     };
 
     /**
@@ -549,7 +567,9 @@ public:
     /**
      * @brief Construtor padrão para a árvore AVL.
      */
-    AVL();
+    AVL() {
+        raiz = nullptr;
+    };
 
     /**
      * @brief Construtor de cópia para a árvore AVL.
@@ -563,7 +583,9 @@ public:
     /**
      * @brief Destrutor para a árvore AVL.
      */
-    ~AVL();
+    ~AVL() {
+        limpa();
+    };
 
     /**
      * @brief Operador de atribuição para a árvore AVL.
@@ -685,22 +707,25 @@ public:
 
     /**
      * @brief Une a árvore AVL atual com outra árvore AVL.
-     * 
+     *
      * @param T Referência para a árvore AVL a ser unida.
+     * @param destino Referência para a árvore AVL onde o resultado será armazenado.
      */
-    void uniao(AVL &T) {
-        uniao(T.raiz);
-    };
+    void uniao(AVL &T, AVL &destino)
+    {
+        uniao(this->raiz, destino);
+        uniao(T.raiz, destino);
+    }
 
     /**
      * @brief Intersecciona duas árvores AVL e armazena o resultado em uma terceira árvore.
      * 
      * @param T1 Referência para a primeira árvore AVL.
      * @param T2 Referência para a segunda árvore AVL.
-     * @param resultado Referência para a árvore AVL onde o resultado será armazenado.
+     * @param T3 Referência para a árvore AVL onde o resultado será armazenado.
      */
-    void intersecao(AVL &T1, AVL &T2, AVL &resultado) {
-        intersecao(T1.raiz, T2, resultado);
+    void intersecao(AVL &T1, AVL &T2, AVL &T3) {
+        intersecao(T1.raiz, T2, T3);
     };
 
     /**
@@ -746,90 +771,167 @@ public:
     };
 };
 
-int main(void) {
-
-    // Criação de três Bancos de Dados AVL
-    AVL T1, T2, intersecao_T1_T2;
-
-    // Conjunto de códigos de produtos
-    int v1[] = {33, 5, 10, 21, 20, 23, 18, 16, 19, 15, 17, 22, 14};
-    int v2[] = {3, 0, 10, 21, 20, 23, 18, 16, 19, 15, 25, 26, 13};
-
-    /* 
-        Operações Básicas 
-    */
-    // Insere produtos de v1 em T1
-    printf("## Inserção de produtos\n\n");
-    printf("T1:\n");
-    for (const auto &x : v1) {
-        printf("\nInserindo %d...\n", x);
-        T1.insere(x); 
-        printf("T:\n");
-        T1.escreve("", T1.get_raiz());
+// Testes
+/**
+ * @brief Lê um arquivo de texto e retorna um vetor de inteiros.
+ * 
+ * @param filename O nome do arquivo de texto.
+ * @return Um vetor de inteiros lidos do arquivo.
+ */
+std::vector<int> ler_arquivo(const std::string& filename) {
+    std::ifstream file(filename);
+    std::vector<int> valores;
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        int valor;
+        while (iss >> valor) {
+            valores.push_back(valor);
+        }
     }
+    return valores;
+}
 
-    // Busca de produtos em T1
-    // printf("\n## Busca de produtos\n\n");
-    // int valor_busca;
+int main(int argc, char *argv[])
+{
 
-    // printf("Insira um valor para buscar na árvore T1: ");
-    // scanf("%d", &valor_busca);
+    AVL T1, T2, intersecao_T3, uniao_T3;
 
-    // printf("Buscando %d...\n", valor_busca);
-    // No *n = T1.busca(valor_busca);
-    // if (n != nullptr) {
-    //     printf("Encontrado: ");
-    //     n->escreve("\n");
-    // } else {
-    //     printf("Não encontrado.\n");
-    // }
+    int opcao;
+    do
+    {
+        std::vector<int> v1, v2;
+        std::cout << "\n## --------- Menu de Opções ---------\n"
+                  << "0: Apenas inserir os produtos\n"
+                  << "1: Realizar uma busca em uma das duas árvores\n"
+                  << "2: Realizar uma remoção em uma das duas árvores\n"
+                  << "3: Realizar a união de T1 e T2\n"
+                  << "4: Realizar a interseção de T1 e T2\n"
+                  << "5: Buscar elementos em um intervalo\n"
+                  << "6: Sair\n"
+                  << "Escolha uma opção: ";
+        std::cin >> opcao;
 
-    // // Remove produtos de v1 em T1
-    // printf("\n## Remoção de produtos\n\n");
-    // printf("T1:\n");
-    // T1.escreve();
-    // for (const auto &x : v1) {
-    //     printf("\nRemovendo %d...\n", x);
-    //     T1.remove(x);
-    //     printf("T:\n");
-    //     T1.escreve("", T1.get_raiz());
-    // }
-    
-    // /* 
-    //     Operações Avançadas 
-    // */
-    // // União de T1 e T2
-    // printf("\n## União de T1 e T2\n\n");
-    // printf("T1:\n");
-    // T1.escreve("", T1.get_raiz());
-    // printf("T2:\n");
-    // T2.escreve("", T2.get_raiz());
-    // printf("T1 U T2:\n");
-    // T1.uniao(T2);  // Une T2 em T1
-    // T1.escreve("", T1.get_raiz());  // Imprime T1 com a união
-    
-    // // Interseção de T1 e T2
-    // printf("\n## Interseção de T1 e T2\n\n");
-    // printf("T1:\n");
-    // T1.escreve("", T1.get_raiz());
-    // printf("T2:\n");
-    // T2.escreve("", T2.get_raiz());
-    // printf("T1 ∩ T2:\n");
-    // intersecao_T1_T2.intersecao(T1, T2, intersecao_T1_T2);
-    // intersecao_T1_T2.escreve("", intersecao_T1_T2.get_raiz());  // Imprime a árvore resultante da interseção   
-    
-    // // Busca de elementos em um intervalo de T1 ou T2
-    // printf("\n## Busca de produtos em um intervalo de T2\n\n");
-    // int valor_min, valor_max;
+        // Verificar se a entrada falhou devido a dados inválidos
+        if (std::cin.fail())
+        {
+            std::cin.clear();                                                   // Limpa o estado de erro de std::cin
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora a entrada inválida
+            std::cerr << "\n\n>> Opção inválida! Tente novamente. <<\n";
+            continue; // Retorna ao menu
+        }
 
-    // printf("Insira um valor mínimo para buscar na árvore T2: ");
-    // scanf("%d\n", &valor_min);
-    // printf("Insira um valor máximo para buscar na árvore T2: ");
-    // scanf("%d\n", &valor_max);
+        switch (opcao)
+        {
+        case 0:
+        {
+            std::string arquivo1, arquivo2;
+            std::cout << "\nDigite o nome do primeiro arquivo: ";
+            std::cin >> arquivo1;
+            std::cout << "Digite o nome do segundo arquivo: ";
+            std::cin >> arquivo2;
 
-    // printf("\nBuscando intervalo [%d, %d]...\n", valor_min, valor_max);
-    // printf("T2:\n");
-    // T2.busca_intervalo(valor_min, valor_max);
-    
+            if (arquivo1.empty())
+            {
+                std::cout << "Digite o nome do arquivo para T1: ";
+                std::cin >> arquivo1;
+            }
+            if (arquivo2.empty())
+            {
+                std::cout << "Digite o nome do arquivo para T2: ";
+                std::cin >> arquivo2;
+            }
+
+            v1 = ler_arquivo(arquivo1);
+            v2 = ler_arquivo(arquivo2);
+
+            std::cout << "\n\n## Inserção de produtos em T1 e T2\n\n";
+            for (const auto &x : v1)
+                T1.insere(x);
+            for (const auto &x : v2)
+                T2.insere(x);
+
+            std::cout << "T1:\n";
+            T1.escreve("", T1.get_raiz());
+            std::cout << "T2:\n";
+            T2.escreve("", T2.get_raiz());
+            break;
+        }
+
+        case 1:
+        {
+            int valor_busca, arvore;
+            std::cout << "\n\nInsira o número da árvore (1 para T1, 2 para T2): ";
+            std::cin >> arvore;
+            std::cout << "Insira um valor para buscar: ";
+            std::cin >> valor_busca;
+
+            AVL *tree = (arvore == 1) ? &T1 : &T2;
+            No *n = tree->busca(valor_busca);
+            if (n != nullptr)
+            {
+                std::cout << "\nValor " << valor_busca << " encontrado! \n";
+                tree->escreve("", n);
+            }
+            else
+            {
+                std::cout << "Não encontrado.\n";
+            }
+            break;
+        }
+
+        case 2:
+        {
+            int valor_remover, arvore;
+            std::cout << "\nInsira o número da árvore (1 para T1, 2 para T2): ";
+            std::cin >> arvore;
+            std::cout << "Insira um valor para remover: ";
+            std::cin >> valor_remover;
+
+            AVL *tree = (arvore == 1) ? &T1 : &T2;
+            std::cout << "\nÁrvore antes da remoção:\n\n";
+            tree->escreve("", tree->get_raiz());
+            tree->remove(valor_remover);
+            std::cout << "\nÁrvore após a remoção:\n\n";
+            tree->escreve("", tree->get_raiz());
+            break;
+        }
+
+        case 3:
+            std::cout << "\n\n## União de T1 e T2\n";
+            T1.uniao(T2, uniao_T3);
+            uniao_T3.escreve("", uniao_T3.get_raiz());
+            break;
+
+        case 4:
+            std::cout << "\n\n## Interseção de T1 e T2\n";
+            intersecao_T3.intersecao(T1, T2, intersecao_T3);
+            intersecao_T3.escreve("", intersecao_T3.get_raiz());
+            break;
+
+        case 5:
+        {
+            int valor_min, valor_max, arvore;
+            std::cout << "\n\nInsira o número da árvore (1 para T1, 2 para T2): ";
+            std::cin >> arvore;
+            std::cout << "Insira o valor mínimo: ";
+            std::cin >> valor_min;
+            std::cout << "Insira o valor máximo: ";
+            std::cin >> valor_max;
+
+            AVL *tree = (arvore == 1) ? &T1 : &T2;
+            tree->busca_intervalo(valor_min, valor_max);
+            break;
+        }
+
+        case 6:
+            std::cout << "\n\n>> Saindo do programa >>\n";
+            break;
+
+        default:
+            std::cerr << "\n\n>> Opção inválida! Tente novamente. <<\n";
+        }
+    } while (opcao != 6);
+
     return 0;
 }
