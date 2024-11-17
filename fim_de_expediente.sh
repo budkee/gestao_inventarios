@@ -5,7 +5,7 @@
 # Alterar a mensagem conforme o que foi feito no dia 
 
 git add .
-git commit -m "Implementação do programa principal | #03"
+git commit -m "Correção de alocação de memória | #01"
 echo "\n"
 git push
 echo "\n"

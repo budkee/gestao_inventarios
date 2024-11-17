@@ -6,13 +6,11 @@
  *
  */
 
-// Bibliotecas
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
+#include <cstdio>
+#include <cstdlib>
 
-// Classes
+// #define int MAX 100
 
 /**
  * @class No
@@ -21,7 +19,8 @@
  * A classe No encapsula os atributos e métodos necessários para a manipulação de um nó em uma árvore AVL,
  * incluindo a gestão de seus filhos, altura e fator de balanceamento. 
  */
-class No {
+class No 
+{
 
     friend class AVL;
 
@@ -771,94 +770,146 @@ public:
     };
 };
 
-// Testes
+/**
+ * @brief Conta o número de linhas em um arquivo de texto.
+ * 
+ * @param filename O nome do arquivo de texto.
+ * @return O número de linhas no arquivo.
+ */
+int contar_linhas(const char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    if (file == NULL)
+    {
+        std::cerr << "Erro ao abrir o arquivo: " << filename << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    int linhas = 0;
+    char ch;
+    while ((ch = fgetc(file)) != EOF)
+    {
+        if (ch == '\n')
+        {
+            linhas++;
+        }
+    }
+
+    if (ferror(file))
+    {
+        std::cerr << "Erro de leitura no arquivo: " << filename << std::endl;
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    fclose(file);
+    return linhas;
+}
+
 /**
  * @brief Lê um arquivo de texto e retorna um vetor de inteiros.
  * 
  * @param filename O nome do arquivo de texto.
  * @return Um vetor de inteiros lidos do arquivo.
  */
-std::vector<int> ler_arquivo(const std::string& filename) {
-    std::ifstream file(filename);
-    std::vector<int> valores;
-    std::string line;
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        int valor;
-        while (iss >> valor) {
-            valores.push_back(valor);
-        }
+void ler_arquivo(const char *filename, int valores[], int &tamanho)
+{
+    tamanho = contar_linhas(filename);
+    const int MAX = 100;
+    if (tamanho > MAX)
+    {
+        std::cerr << "O arquivo contém mais elementos do que o tamanho máximo permitido ("
+                  << MAX << "). Redefina o limite.\n";
+        exit(EXIT_FAILURE);
     }
-    return valores;
+
+    FILE *file = fopen(filename, "r");
+    if (file == NULL)
+    {
+        std::cerr << "Erro ao abrir o arquivo: " << filename << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    int i = 0;
+    while (fscanf(file, "%d", &valores[i]) != EOF && i < tamanho)
+    {
+        i++;
+    }
+
+    if (ferror(file))
+    {
+        std::cerr << "Erro de leitura no arquivo: " << filename << std::endl;
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    fclose(file);
 }
 
 int main(int argc, char *argv[])
 {
 
-    AVL T1, T2, intersecao_T3, uniao_T3;
+    AVL T1, T2, T3_intersecao, T3_uniao;
 
     int opcao;
     do
     {
-        std::vector<int> v1, v2;
+        const int MAX = 100;
+        int v1[MAX], v2[MAX];
+        int tamanho_v1 = 0, tamanho_v2 = 0;
+
         std::cout << "\n## --------- Menu de Opções ---------\n"
-                  << "0: Apenas inserir os produtos\n"
-                  << "1: Realizar uma busca em uma das duas árvores\n"
-                  << "2: Realizar uma remoção em uma das duas árvores\n"
-                  << "3: Realizar a união de T1 e T2\n"
-                  << "4: Realizar a interseção de T1 e T2\n"
-                  << "5: Buscar elementos em um intervalo\n"
-                  << "6: Sair\n"
+                  << "1: Inserir o código dos itens\n"
+                  << "2: Buscar um item em uma das duas árvores\n"
+                  << "3: Remover um item em uma das duas árvores\n"
+                  << "4: Unir T1 e T2\n"
+                  << "5: Interseccionar T1 e T2\n"
+                  << "6: Buscar elementos em um intervalo\n"
+                  << "7: Sair do programa\n"
                   << "Escolha uma opção: ";
         std::cin >> opcao;
 
         // Verificar se a entrada falhou devido a dados inválidos
         if (std::cin.fail())
         {
-            std::cin.clear();                                                   // Limpa o estado de erro de std::cin
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignora a entrada inválida
+            std::cin.clear(); // Limpa o estado de erro de std::cin
+            // Ignora todos os caracteres até encontrar '\n' manualmente
+            while (std::cin.get() != '\n');
             std::cerr << "\n\n>> Opção inválida! Tente novamente. <<\n";
             continue; // Retorna ao menu
         }
 
         switch (opcao)
         {
-        case 0:
+        // --------------- Inserção ----------------
+        case 1:
         {
-            std::string arquivo1, arquivo2;
+            char arquivo1[MAX], arquivo2[MAX];
+            
             std::cout << "\nDigite o nome do primeiro arquivo: ";
             std::cin >> arquivo1;
+            ler_arquivo(arquivo1, v1, tamanho_v1);
+
             std::cout << "Digite o nome do segundo arquivo: ";
             std::cin >> arquivo2;
-
-            if (arquivo1.empty())
-            {
-                std::cout << "Digite o nome do arquivo para T1: ";
-                std::cin >> arquivo1;
-            }
-            if (arquivo2.empty())
-            {
-                std::cout << "Digite o nome do arquivo para T2: ";
-                std::cin >> arquivo2;
-            }
-
-            v1 = ler_arquivo(arquivo1);
-            v2 = ler_arquivo(arquivo2);
+            ler_arquivo(arquivo2, v2, tamanho_v2);
 
             std::cout << "\n\n## Inserção de produtos em T1 e T2\n\n";
-            for (const auto &x : v1)
-                T1.insere(x);
-            for (const auto &x : v2)
-                T2.insere(x);
+            for (int i = 0; i < tamanho_v1; ++i)
+                T1.insere(v1[i]);
+            for (int i = 0; i < tamanho_v2; ++i)
+                T2.insere(v2[i]);
 
             std::cout << "T1:\n";
             T1.escreve("", T1.get_raiz());
             std::cout << "T2:\n";
             T2.escreve("", T2.get_raiz());
+
             break;
         }
 
-        case 1:
+        // --------------- Busca ----------------
+        case 2:
         {
             int valor_busca, arvore;
             std::cout << "\n\nInsira o número da árvore (1 para T1, 2 para T2): ";
@@ -880,7 +931,8 @@ int main(int argc, char *argv[])
             break;
         }
 
-        case 2:
+        // --------------- Remoção ----------------
+        case 3:
         {
             int valor_remover, arvore;
             std::cout << "\nInsira o número da árvore (1 para T1, 2 para T2): ";
@@ -896,20 +948,27 @@ int main(int argc, char *argv[])
             tree->escreve("", tree->get_raiz());
             break;
         }
-
-        case 3:
-            std::cout << "\n\n## União de T1 e T2\n";
-            T1.uniao(T2, uniao_T3);
-            uniao_T3.escreve("", uniao_T3.get_raiz());
-            break;
-
+        
+        // --------------- União ----------------
         case 4:
-            std::cout << "\n\n## Interseção de T1 e T2\n";
-            intersecao_T3.intersecao(T1, T2, intersecao_T3);
-            intersecao_T3.escreve("", intersecao_T3.get_raiz());
+        {
+            std::cout << "\n\n## União de T1 e T2\n";
+            T1.uniao(T2, T3_uniao);
+            T3_uniao.escreve("", T3_uniao.get_raiz());
             break;
-
+        }
+        
+        // ---------------- Interseção ----------------
         case 5:
+        {
+            std::cout << "\n\n## Interseção de T1 e T2\n";
+            T3_intersecao.intersecao(T1, T2, T3_intersecao);
+            T3_intersecao.escreve("", T3_intersecao.get_raiz());
+            break;
+        }
+        
+        // ---------------- Busca em intervalo ----------------
+        case 6:
         {
             int valor_min, valor_max, arvore;
             std::cout << "\n\nInsira o número da árvore (1 para T1, 2 para T2): ";
@@ -923,15 +982,22 @@ int main(int argc, char *argv[])
             tree->busca_intervalo(valor_min, valor_max);
             break;
         }
-
-        case 6:
+        
+        // ---------------- Sair ----------------
+        case 7:
+        {
             std::cout << "\n\n>> Saindo do programa >>\n";
             break;
+        }
 
+        // ---------------- Opção inválida ----------------
         default:
+        {
             std::cerr << "\n\n>> Opção inválida! Tente novamente. <<\n";
         }
-    } while (opcao != 6);
+        }
+    
+    } while (opcao != 7);
 
     return 0;
 }
