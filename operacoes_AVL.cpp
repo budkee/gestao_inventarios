@@ -16,18 +16,16 @@
  * @class No
  * @brief Classe que representa um nó em uma árvore AVL.
  * 
- * A classe No encapsula os atributos e métodos necessários para a manipulação de um nó em uma árvore AVL,
- * incluindo a gestão de seus filhos, altura e fator de balanceamento. 
+ * A classe No encapsula os atributos e métodos necessários para a manipulação de um nó em uma árvore AVL, incluindo a gestão de seus filhos, altura e fator de balanceamento. 
+ *
+ * @details Cada Nó é um produto dotado de código e sua altura na árvore. Além disso, cada nó possui um ponteiro para o nó pai, um para o nó à esquerda e outro para o nó à direita.
  */
 class No 
 {
-
     friend class AVL;
 
-/**
- * @brief Cada Nó é um produto dotado de código e sua altura na árvore. Além disso, cada nó possui um ponteiro para o nó pai, um para o nó à esquerda e outro para o nó à direita.
- */
 private:
+
     int codigo;
     int altura;
     No *mae;
@@ -37,7 +35,7 @@ private:
 public:
     
     /**
-     * @brief Construtor de um nó atribuindo o código e altura, além do estado do ponteiro da mãe, filho esquerdo e direito.
+     * @brief Construtor da classe No.
      * @param codigo Código do nó.
      */
     No(const int codigo) : 
@@ -52,7 +50,7 @@ public:
      * @brief Escreve o código do nó com um espaço como separador padrão.
      * @param sep Separador a ser utilizado após o código do nó.
      */
-    void escreve(const char *sep = "") {
+    void escreve(const char *sep = ">> ") const {
         
         std::cout << codigo << sep;
         
@@ -86,10 +84,12 @@ public:
     /**
      * @brief Retorna o fator de balanceamento do nó.
      * @return Fator de balanceamento do nó.
+     * @details O fator de balanceamento é a diferença entre a altura da subárvore esquerda e a altura da subárvore direita.
+     * @details se a altura da subárvore esquerda não for nula, retorna a altura, senão, retorna -1
      */
     inline int bal() {
 
-        // Altura da subárvore esquerda: se a altura não for nula, retorna a altura, senão, retorna -1
+        // Altura da subárvore esquerda
         int alt_esq = esq ? esq->altura : -1;
         
         // Altura da subárvore direita
@@ -120,14 +120,13 @@ public:
  * @class AVL
  * @brief Classe que representa uma árvore AVL (árvore binária de busca auto-balanceada).
  * 
- * A árvore AVL mantém seu balanceamento realizando rotações durante inserções e remoções.
- * Isso garante que a árvore permaneça balanceada, proporcionando complexidade de tempo O(log n) para operações de busca, inserção e remoção.
+ * @details A árvore AVL mantém seu balanceamento realizando rotações durante inserções e remoções. Isso garante que a árvore permaneça balanceada, proporcionando complexidade de tempo O(log n) para operações de busca, inserção e remoção.
  */
 class AVL
 {
 private:
     
-    No *raiz; ///< Ponteiro para o nó raiz da árvore AVL.
+    No *raiz; 
 
     /**
      * @brief Insere um nó na árvore AVL.
@@ -136,35 +135,47 @@ private:
      */
     void insere(No *z) {
         
-        
+        // Auxiliares
         No *y = nullptr;
         No *x = raiz;
 
+
         while (x != nullptr) {
+            
+            // Aponta para o nó atual
             y = x;
+
+            // Verifica se z é menor que a raiz
             if (z->codigo < x->codigo) 
                 x = x->esq;
             else 
                 x = x->dir;
         }
 
+        // Definição da mãe de z
         z->mae = y;
+
+        // Se a árvore estiver vazia, z é a raiz
         if (y == nullptr) 
             raiz = z;
         else 
+            // Verifica se z é menor que o auxiliar
             if (z->codigo < y->codigo) 
                 y->esq = z;
             else 
                 y->dir = z;
 
-        // Ajusta os fatores de balanceamento
+        // Verifica se z é raiz
         if (z->eh_raiz())
             return;
         
-        do { // o laço inicia subindo imediatamente para a mãe do nó inserido
+        // Ajusta o balanceamento da árvore
+        do { 
             z = z->mae;
             z = ajusta_balanceamento(z, true);
-        } while (!z->eh_raiz() and z->bal() != 0);
+        } while (
+            !z->eh_raiz() and z->bal() != 0
+        );
     };
 
     /**
@@ -175,9 +186,10 @@ private:
      * @return Ponteiro para o nó com a chave especificada, ou nullptr se não encontrado.
      */
     No *busca(No *x, int k) {
-        
+        // Caso o nó inicial seja nulo ou a chave seja igual à chave do nó
         if (x == nullptr || x->codigo == k)
             return x;
+        // Caso a chave seja menor que a chave do nó, busca à esquerda
         if (k < x->codigo) 
             return busca(x->esq, k);
         else
@@ -191,6 +203,7 @@ private:
      * @return Ponteiro para o nó com a chave mínima.
      */
     No *minimo(No *x) {
+        // Enquanto houver um nó à esquerda, o nó atual é substituído pelo filho esquerdo
         while (x->esq != nullptr) 
             x = x->esq;
         return x;
@@ -203,6 +216,7 @@ private:
      * @return Ponteiro para o nó com a chave máxima.
      */
     No *maximo(No *x) {
+        // Enquanto houver um nó à direita, o nó atual é substituído pelo filho direito
         while (x->dir != nullptr) 
             x = x->dir;
         return x;
@@ -223,7 +237,9 @@ private:
         else 
             u->mae->dir = v;
         
+        // Se houver um nó v
         if (v != nullptr) 
+            // O nó v recebe a mãe do nó u
             v->mae = u->mae;
     };
 
@@ -242,7 +258,7 @@ private:
         // Obtém o balanceamento do nó
         int balance = p->bal();
 
-        // Caso 1: Se o balanceamento for 2, o nó está desbalanceado para a direita | Rotação à direita ou dupla à direita.
+        // Caso 1: Se o balanceamento de p for 2, o nó está desbalanceado para a esquerda | Rotação à direita ou dupla à direita.
         if (balance == 2) {
 
             // Se o fator de balanceamento do filho esquerdo for maior ou igual a zero
@@ -267,7 +283,7 @@ private:
 
         } else
             
-            // Caso 2: Se o balanceamento for -2, o nó está desbalanceado para a esquerda | Rotação à esquerda ou dupla à esquerda.
+            // Caso 2: Se o balanceamento for -2, o nó está desbalanceado para a direita | Rotação à esquerda ou dupla à esquerda.
             if (balance == -2) {
                 
                 // Se o fator de balanceamento do filho direito for menor ou igual a zero
@@ -536,30 +552,6 @@ private:
             busca_intervalo(x->dir, min, max);
         }
     };
-
-    /**
-     * @brief Copia uma string para outra.
-     * @param destino Ponteiro para a string de destino.
-     * @param origem Ponteiro para a string de origem.
-     */
-    void copia_string(char* destino, const char* origem) const {
-        while (*origem) {
-            *destino++ = *origem++;
-        }
-        *destino = '\0';
-    }
-
-    /**
-     * @brief Concatena uma string a outra.
-     * @param destino Ponteiro para a string de destino.
-     * @param origem Ponteiro para a string de origem.
-     */
-    void concatena_string(char* destino, const char* origem) const {
-        while (*destino) {
-            destino++;
-        }
-        copia_string(destino, origem);
-    }
     
 
 public:
@@ -743,7 +735,7 @@ public:
      * @param prefixo A string de prefixo para formatar a saída.
      * @param x Ponteiro para o nó de onde a escrita começa.
      */
-    void escreve(const char* prefixo = "", No* x = nullptr, bool isLeft = true) const {
+    void escreve(const char* prefixo = "", No* x = nullptr, bool isLeft = true) {
         if (x != nullptr) {
             std::cout << prefixo;
             std::cout << (isLeft ? "├── " : "└── ");
@@ -768,7 +760,33 @@ public:
             escreve(novoPrefixoDir, x->dir, false);
         }
     };
+    /**
+     * @brief Copia uma string para outra.
+     * @param destino Ponteiro para a string de destino.
+     * @param origem Ponteiro para a string de origem.
+     */
+    void copia_string(char *destino, const char *origem) {
+        while (*origem)
+        {
+            *destino++ = *origem++;
+        }
+        *destino = '\0';
+    }
+
+    /**
+     * @brief Concatena uma string a outra.
+     * @param destino Ponteiro para a string de destino.
+     * @param origem Ponteiro para a string de origem.
+     */
+    void concatena_string(char *destino, const char *origem) {
+        while (*destino)
+        {
+            destino++;
+        }
+        copia_string(destino, origem);
+    };
 };
+
 
 /**
  * @brief Conta o número de linhas em um arquivo de texto.
