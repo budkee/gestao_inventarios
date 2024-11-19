@@ -47,6 +47,14 @@ public:
     {}
 
     /**
+     * @brief Destrutor da classe No.
+     * @param x Ponteiro para o nó a ser destruído.
+     */
+    ~No(){
+    };
+
+
+    /**
      * @brief Escreve o código do nó com um espaço como separador padrão.
      * @param sep Separador a ser utilizado após o código do nó.
      */
@@ -563,6 +571,13 @@ public:
     };
 
     /**
+     * @brief Destrutor para a árvore AVL.
+     */
+    ~AVL() {
+        limpa();
+    };
+
+    /**
      * @brief Construtor de cópia para a árvore AVL.
      * 
      * @param outro Referência para a árvore AVL a ser copiada.
@@ -571,12 +586,6 @@ public:
         copia(outro);
     };
 
-    /**
-     * @brief Destrutor para a árvore AVL.
-     */
-    ~AVL() {
-        limpa();
-    };
 
     /**
      * @brief Operador de atribuição para a árvore AVL.

@@ -42,6 +42,11 @@ Este trabalho consiste na implementação de um sistema de gestão de inventári
     ```
 5. Siga as instruções exibidas no terminal para interagir com o sistema de gestão de inventários.
 
+6. Verifique se existe vazamento no programa.
+    ``` sh
+    valgrind --leak-check=full --show-reachable=yes --track-fds=yes ./programa.out operacoes_AVL.cpp    
+    ```
+
 ## Estrutura do Projeto
 
 - `README.md`: Este arquivo, contendo a descrição do projeto e instruções de uso.
