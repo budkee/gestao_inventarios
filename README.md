@@ -42,6 +42,7 @@ Este trabalho consiste na implementação de um sistema de gestão de inventári
     ```
 5. Siga as instruções exibidas no terminal para interagir com o sistema de gestão de inventários.
 
+<<<<<<< HEAD
 6. Caso queira verificar se existe vazamento de memória com o valgrind e está em um ambiente Linux, execute:
 
     ```sh
@@ -61,6 +62,13 @@ Este trabalho consiste na implementação de um sistema de gestão de inventári
             docker run --name ubuntu_valgrind -it valgrind
         ```
 
+=======
+6. Verifique se existe vazamento no programa.
+    ``` sh
+    valgrind --leak-check=full --show-reachable=yes --track-fds=yes ./programa.out operacoes_AVL.cpp    
+    ```
+
+>>>>>>> ecad7ae5afe5b502310fa069cfb9482312561799
 ## Estrutura do Projeto
 
 - `README.md`: Este arquivo, contendo a descrição do projeto e instruções de uso.
