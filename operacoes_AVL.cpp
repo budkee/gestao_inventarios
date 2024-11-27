@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-// #define int MAX 100
+#define MAX 100
 
 /**
  * @class No
@@ -833,7 +833,6 @@ int contar_linhas(const char *filename)
 void ler_arquivo(const char *filename, int valores[], int &tamanho)
 {
     tamanho = contar_linhas(filename);
-    const int MAX = 100;
     if (tamanho > MAX)
     {
         std::cerr << "O arquivo contém mais elementos do que o tamanho máximo permitido ("
@@ -848,6 +847,9 @@ void ler_arquivo(const char *filename, int valores[], int &tamanho)
         exit(EXIT_FAILURE);
     }
 
+    // Lê os valores do arquivo
+
+    
     int i = 0;
     while (fscanf(file, "%d", &valores[i]) != EOF && i < tamanho)
     {
@@ -872,9 +874,6 @@ int main(int argc, char *argv[])
     int opcao;
     do
     {
-        const int MAX = 100;
-        int v1[MAX], v2[MAX];
-        int tamanho_v1 = 0, tamanho_v2 = 0;
 
         std::cout << "\n## --------- Menu de Opções ---------\n"
                   << "1: Inserir o código dos itens\n"
@@ -883,25 +882,24 @@ int main(int argc, char *argv[])
                   << "4: Unir T1 e T2\n"
                   << "5: Interseccionar T1 e T2\n"
                   << "6: Buscar elementos em um intervalo\n"
-                  << "7: Sair do programa\n"
-                  << "Escolha uma opção: ";
+                  << "7: Sair do programa\n\n"
+                  << ">> Escolha uma opção: ";
         std::cin >> opcao;
 
         // Verificar se a entrada falhou devido a dados inválidos
-        if (std::cin.fail())
+        if (opcao < 1 || opcao > 7)
         {
-            std::cin.clear(); // Limpa o estado de erro de std::cin
-            // Ignora todos os caracteres até encontrar '\n' manualmente
-            while (std::cin.get() != '\n');
             std::cerr << "\n\n>> Opção inválida! Tente novamente. <<\n";
             continue; // Retorna ao menu
-        }
+        };
 
         switch (opcao)
         {
         // --------------- Inserção ----------------
         case 1:
         {
+            int v1[MAX], v2[MAX];
+            int tamanho_v1, tamanho_v2;
             char arquivo1[MAX], arquivo2[MAX];
             
             std::cout << "\nDigite o nome do primeiro arquivo: ";
@@ -930,40 +928,58 @@ int main(int argc, char *argv[])
         case 2:
         {
             int valor_busca, arvore;
-            std::cout << "\n\nInsira o número da árvore (1 para T1, 2 para T2): ";
-            std::cin >> arvore;
-            std::cout << "Insira um valor para buscar: ";
-            std::cin >> valor_busca;
+            
+            if (!T1.get_raiz() || !T2.get_raiz())
+            {
+                std::cerr << "\n>>> Árvores vazias. Insira elementos primeiro. <<<\n";
+                break;
+            } else {
+                std::cout << "\n\n>> Insira o número da árvore (1 para T1, 2 para T2): ";
+                std::cin >> arvore;
+                std::cout << "\n>>> Insira um valor para buscar: ";
+                std::cin >> valor_busca;
 
-            AVL *tree = (arvore == 1) ? &T1 : &T2;
-            No *n = tree->busca(valor_busca);
-            if (n != nullptr)
-            {
-                std::cout << "\nValor " << valor_busca << " encontrado! \n";
-                tree->escreve("", n);
+                AVL *tree = (arvore == 1) ? &T1 : &T2;
+                No *n = tree->busca(valor_busca);
+                if (n != nullptr)
+                {
+                    std::cout << "\nValor " << valor_busca << " encontrado! \n";
+                    tree->escreve("", n);
+                }
+                else
+                {
+                    std::cout << "Não encontrado.\n";
+                }
+                break;
             }
-            else
-            {
-                std::cout << "Não encontrado.\n";
-            }
-            break;
+
         }
 
-        // --------------- Remoção ----------------
+        // ----------- Remoção ------------
         case 3:
         {
-            int valor_remover, arvore;
-            std::cout << "\nInsira o número da árvore (1 para T1, 2 para T2): ";
-            std::cin >> arvore;
-            std::cout << "Insira um valor para remover: ";
-            std::cin >> valor_remover;
+            int valor_remover, arvore;  
+            if (!T1.get_raiz() || !T2.get_raiz())
+            {
+                std::cerr << "\n>>> Árvores vazias. Insira elementos primeiro. <<<\n";
+                break;
+            } else {
+                
+                std::cout << "\nInsira o número da árvore (1 para T1, 2 para T2): ";
+                std::cin >> arvore;
+                
+                std::cout << "\n>> Insira um valor para remover: ";
+                std::cin >> valor_remover;
 
-            AVL *tree = (arvore == 1) ? &T1 : &T2;
-            std::cout << "\nÁrvore antes da remoção:\n\n";
-            tree->escreve("", tree->get_raiz());
-            tree->remove(valor_remover);
-            std::cout << "\nÁrvore após a remoção:\n\n";
-            tree->escreve("", tree->get_raiz());
+                AVL *tree = (arvore == 1) ? &T1 : &T2;
+                std::cout << "\nÁrvore antes da remoção:\n\n";
+                tree->escreve("", tree->get_raiz());
+                tree->remove(valor_remover);
+                std::cout << "\nÁrvore após a remoção:\n\n";
+                tree->escreve("", tree->get_raiz());
+                break;
+            }
+
             break;
         }
         
@@ -971,37 +987,62 @@ int main(int argc, char *argv[])
         case 4:
         {
             std::cout << "\n\n## União de T1 e T2\n";
-            T1.uniao(T2, T3_uniao);
-            T3_uniao.escreve("", T3_uniao.get_raiz());
-            break;
+            if (!T1.get_raiz() || !T2.get_raiz())
+            {
+                std::cerr << "\n>>> Árvores vazias. Insira elementos primeiro. <<<\n";
+                break;
+            } else {
+                T1.uniao(T2, T3_uniao);
+                T3_uniao.escreve("", T3_uniao.get_raiz());
+                break;
+            }
         }
         
         // ---------------- Interseção ----------------
         case 5:
         {
             std::cout << "\n\n## Interseção de T1 e T2\n";
-            T3_intersecao.intersecao(T1, T2, T3_intersecao);
-            T3_intersecao.escreve("", T3_intersecao.get_raiz());
-            break;
+            if (!T1.get_raiz() || !T2.get_raiz())
+            {
+                std::cerr << "\n>>> Árvores vazias. Insira elementos primeiro. <<<\n";
+                break;
+            } else {
+                    
+                T3_intersecao.intersecao(T1, T2, T3_intersecao);
+                T3_intersecao.escreve("", T3_intersecao.get_raiz());
+                break;  
+            }
         }
-        
+
         // ---------------- Busca em intervalo ----------------
         case 6:
         {
             int valor_min, valor_max, arvore;
-            std::cout << "\n\nInsira o número da árvore (1 para T1, 2 para T2): ";
-            std::cin >> arvore;
-            std::cout << "Insira o valor mínimo: ";
-            std::cin >> valor_min;
-            std::cout << "Insira o valor máximo: ";
-            std::cin >> valor_max;
+            
 
-            AVL *tree = (arvore == 1) ? &T1 : &T2;
-            tree->busca_intervalo(valor_min, valor_max);
-            break;
+            if (!T1.get_raiz() || !T2.get_raiz())
+            {
+                std::cerr << "\n>>> Árvores vazias. Insira elementos primeiro. <<<\n";
+                break;
+            } else if (arvore != 1 || arvore != 2)
+            {
+                std::cerr << "\n>>> Opção inválida. Insira 1 para T1 ou 2 para T2. <<<\n";
+                break;
+            } else {
+                std::cout << "\n\n>> Insira o número da árvore (1 para T1, 2 para T2): ";
+                std::cin >> arvore;
+                std::cout << "\n>>> Insira o valor mínimo: ";
+                std::cin >> valor_min;
+                std::cout << "\n>>> Insira o valor máximo: ";
+                std::cin >> valor_max;
+
+                AVL *tree = (arvore == 1) ? &T1 : &T2;
+                tree->busca_intervalo(valor_min, valor_max);
+                break;
+            }
         }
         
-        // ---------------- Sair ----------------
+        // ------------ Sair ------------
         case 7:
         {
             std::cout << "\n\n>> Saindo do programa >>\n";
@@ -1016,6 +1057,12 @@ int main(int argc, char *argv[])
         }
     
     } while (opcao != 7);
+
+    // Liberar toda memória nas árvores
+    T1.limpa();
+    T2.limpa();
+    T3_intersecao.limpa();
+    T3_uniao.limpa();
 
     return 0;
 }

@@ -42,6 +42,25 @@ Este trabalho consiste na implementação de um sistema de gestão de inventári
     ```
 5. Siga as instruções exibidas no terminal para interagir com o sistema de gestão de inventários.
 
+6. Caso queira verificar se existe vazamento de memória com o valgrind e está em um ambiente Linux, execute:
+
+    ```sh
+     valgrind --leak-check=full --show-reachable=yes --track-fds=yes ./programa.out operacoes_AVL.cpp
+    ```
+
+    1. Caso não esteja em Linux, é possível executar a imagem no Dockerfile para executar em um container Docker. 
+        
+        - Para isso, será necessário instalar Docker na sua máquina.
+        - Dentro do diretório do projeto, execute:
+        ```sh/bash/zsh
+            docker build -t valgrind .
+        ```
+        - Isso vai fazer você construir a imagem a partir do Dockerfile.
+        - Em seguida, levante um container com o seguinte comando:
+        ```sh/bash/zsh
+            docker run --name ubuntu_valgrind -it valgrind
+        ```
+
 ## Estrutura do Projeto
 
 - `README.md`: Este arquivo, contendo a descrição do projeto e instruções de uso.
