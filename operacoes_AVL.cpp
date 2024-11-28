@@ -9,7 +9,8 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
-
+#include <chrono>  
+#include <iomanip> 
 #define MAX 100
 
 /**
@@ -955,11 +956,21 @@ int main(int argc, char *argv[])
             ler_arquivo(arquivo2, v2, tamanho_v2);
 
             std::cout << "\n\n## Inserção de produtos em T1 e T2\n\n";
+            auto start = std::chrono::high_resolution_clock::now(); //medindo inserção T1
             for (int i = 0; i < tamanho_v1; ++i)
                 T1.insere(v1[i]);
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = end - start;
+            std::cout << std::fixed << std::setprecision(6)<< "Tempo de inserção em T1: " << elapsed.count() << " segundos\n";
+            
+            std::cout << "\n";
+            start = std::chrono::high_resolution_clock::now();  //medindo inserção T2
             for (int i = 0; i < tamanho_v2; ++i)
                 T2.insere(v2[i]);
-
+            end = std::chrono::high_resolution_clock::now();
+            elapsed = end - start;
+            std::cout << std::fixed << std::setprecision(6)<< "Tempo de inserção em T2: " << elapsed.count() << " segundos\n";
+           
             std::cout << "T1:\n";
             T1.escreve("", T1.get_raiz());
             std::cout << "T2:\n";
@@ -984,7 +995,14 @@ int main(int argc, char *argv[])
                 std::cin >> valor_busca;
 
                 AVL *tree = (arvore == 1) ? &T1 : &T2;
+
+                auto start = std::chrono::high_resolution_clock::now();
                 No *n = tree->busca(valor_busca);
+                auto end = std::chrono::high_resolution_clock::now();
+                
+                std::chrono::duration<double> elapsed = end - start;
+                std::cout << std::fixed << std::setprecision(6)<< "Tempo de busca: " << elapsed.count() << " segundos\n";
+               
                 if (n != nullptr)
                 {
                     std::cout << "\nValor " << valor_busca << " encontrado! \n";
@@ -1018,7 +1036,14 @@ int main(int argc, char *argv[])
                 AVL *tree = (arvore == 1) ? &T1 : &T2;
                 std::cout << "\nÁrvore antes da remoção:\n\n";
                 tree->escreve("", tree->get_raiz());
+
+                auto start = std::chrono::high_resolution_clock::now();
                 tree->remove(valor_remover);
+                auto end = std::chrono::high_resolution_clock::now();
+                        
+                std::chrono::duration<double> elapsed = end - start;
+                std::cout << std::fixed << std::setprecision(6)<< "Tempo de remoção: " << elapsed.count() << " segundos\n";
+               
                 std::cout << "\nÁrvore após a remoção:\n\n";
                 tree->escreve("", tree->get_raiz());
                 break;
@@ -1036,8 +1061,15 @@ int main(int argc, char *argv[])
                 std::cerr << "\n>>> Árvores vazias. Insira elementos primeiro. <<<\n";
                 break;
             } else {
+                auto start = std::chrono::high_resolution_clock::now();
                 T1.uniao(T2, T3_uniao);
+                auto end = std::chrono::high_resolution_clock::now();
+
+                std::chrono::duration<double> elapsed = end - start;
+                
+               
                 T3_uniao.escreve("", T3_uniao.get_raiz());
+                std::cout << std::fixed << std::setprecision(6)<< "Tempo de união: " << elapsed.count() << " segundos\n";
                 break;
             }
         }
@@ -1051,8 +1083,13 @@ int main(int argc, char *argv[])
                 std::cerr << "\n>>> Árvores vazias. Insira elementos primeiro. <<<\n";
                 break;
             } else {
-                    
+                auto start = std::chrono::high_resolution_clock::now();    
                 T3_intersecao.intersecao(T1, T2, T3_intersecao);
+                auto end = std::chrono::high_resolution_clock::now();
+                
+                std::chrono::duration<double> elapsed = end - start;
+                std::cout << std::fixed << std::setprecision(6)<< "Tempo de interseção: " << elapsed.count() << " segundos\n";
+                
                 T3_intersecao.escreve("", T3_intersecao.get_raiz());
                 break;  
             }
@@ -1081,7 +1118,13 @@ int main(int argc, char *argv[])
                 std::cin >> valor_max;
 
                 AVL *tree = (arvore == 1) ? &T1 : &T2;
+
+                auto start = std::chrono::high_resolution_clock::now();
                 tree->busca_intervalo(valor_min, valor_max);
+                auto end = std::chrono::high_resolution_clock::now();
+
+                std::chrono::duration<double> elapsed = end - start;
+                std::cout << std::fixed << std::setprecision(6)<< "Tempo de busca em intervalo: " << elapsed.count() << " segundos\n";
                 break;
             }
         }
