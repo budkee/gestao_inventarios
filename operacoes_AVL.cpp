@@ -910,13 +910,48 @@ int main(int argc, char *argv[])
             int v1[MAX], v2[MAX];
             int tamanho_v1, tamanho_v2;
             char arquivo1[MAX], arquivo2[MAX];
-            
+
+            // Leitura do primeiro arquivo
             std::cout << "\nDigite o nome do primeiro arquivo: ";
-            std::cin >> arquivo1;
+            int i = 0;
+            char ch;
+
+            // Lê caractere a caractere até encontrar '\n' ou atingir o limite do buffer
+            while (i < MAX - 1 && std::cin.get(ch) && ch != '\n')
+            {
+                arquivo1[i++] = ch;
+            }
+            arquivo1[i] = '\0'; // Finaliza a string manualmente
+
+            if (i == 0)
+            {
+                std::cerr << "Erro: Nome do arquivo inválido!" << std::endl;
+                break;
+            }
+
+            // Ler os dados do arquivo
             ler_arquivo(arquivo1, v1, tamanho_v1);
 
+            // Limpar buffer de entrada para evitar problemas na próxima leitura
+            if (std::cin.peek() == '\n')
+                std::cin.ignore();
+
+            // Leitura do segundo arquivo
             std::cout << "Digite o nome do segundo arquivo: ";
-            std::cin >> arquivo2;
+            i = 0;
+            while (i < MAX - 1 && std::cin.get(ch) && ch != '\n')
+            {
+                arquivo2[i++] = ch;
+            }
+            arquivo2[i] = '\0'; // Finaliza a string manualmente
+
+            if (i == 0)
+            {
+                std::cerr << "Erro: Nome do arquivo inválido!" << std::endl;
+                break;
+            }
+
+            // Ler os dados do arquivo
             ler_arquivo(arquivo2, v2, tamanho_v2);
 
             std::cout << "\n\n## Inserção de produtos em T1 e T2\n\n";
@@ -1027,19 +1062,19 @@ int main(int argc, char *argv[])
         case 6:
         {
             int valor_min, valor_max, arvore;
-            
 
+     
             if (!T1.get_raiz() || !T2.get_raiz())
             {
                 std::cerr << "\n>>> Árvores vazias. Insira elementos primeiro. <<<\n";
                 break;
-            } else if (arvore != 1 || arvore != 2)
-            {
-                std::cerr << "\n>>> Opção inválida. Insira 1 para T1 ou 2 para T2. <<<\n";
-                break;
             } else {
                 std::cout << "\n\n>> Insira o número da árvore (1 para T1, 2 para T2): ";
                 std::cin >> arvore;
+                if (arvore != 1 && arvore != 2) {
+                    std::cerr << "\n>>> Escolha inválida. Tente novamente. <<<\n";
+                    break;
+                }
                 std::cout << "\n>>> Insira o valor mínimo: ";
                 std::cin >> valor_min;
                 std::cout << "\n>>> Insira o valor máximo: ";
