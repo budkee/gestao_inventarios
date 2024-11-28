@@ -16,7 +16,7 @@ Este trabalho consiste na implementação de um sistema de gestão de inventári
 - Via HTTPS
 
     ```sh
-    git clone https://github.com/usuario/gestao_inventarios.git
+    git clone https://github.com/budkee/gestao_inventarios.git
     ```
     `ou`
 

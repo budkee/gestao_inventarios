@@ -7,8 +7,6 @@
  */
 
 #include <iostream>
-#include <cstdio>
-#include <cstdlib>
 #include <chrono>  
 #include <iomanip> 
 #define MAX 100
@@ -275,14 +273,14 @@ private:
                 
                 // Caso 1.1: Rotação à direita  
                 if (girou) 
-                    std::cout << ">> Rotação direita (Caso 1.1)\n";
+                    // std::cout << ">> Rotação direita (Caso 1.1)\n";
                 rotacao_dir(p);
 
             } else { // Se o fator de balanceamento do filho esquerdo for menor que zero
                 
                 // Caso 1.2: Rotação dupla direita
                 if (girou) 
-                    std::cout << ">> Rotação dupla direita (Caso 1.2)\n";
+                    // std::cout << ">> Rotação dupla direita (Caso 1.2)\n";
                 rotacao_dupla_dir(p);
 
             }
@@ -300,14 +298,14 @@ private:
 
                     // Caso 2.1: Rotação à esquerda
                     if (girou) 
-                        std::cout << ">> Rotação esquerda (Caso 2.1)\n";
+                        // std::cout << ">> Rotação esquerda (Caso 2.1)\n";
                     rotacao_esq(p);
                 
                 } else { // Se o fator de balanceamento do filho direito for maior que zero
                     
                     // Caso 2.2: Rotação dupla esquerda
                     if (girou) 
-                        std::cout << ">> Rotação dupla esquerda (Caso 2.2)\n";
+                        // std::cout << ">> Rotação dupla esquerda (Caso 2.2)\n";
                     rotacao_dupla_esq(p);
                 }
                 // Atualiza o nó mãe
@@ -336,14 +334,14 @@ private:
         else {
             
             if (z->dir == nullptr) { 
-                printf("<< Remoção 2o caso\n");
+                // printf("<< Remoção 2o caso\n");
                 p = z->mae; 
                 transplante(z, z->esq);
             }
             else { 
                 No *y = minimo(z->dir);
             
-                printf("<< Remoção 3o caso (a) ");
+                // printf("<< Remoção 3o caso (a) ");
                 if (y->mae != z) { 
                     printf("+ (b)\n");
                     p = y->mae; 
@@ -926,7 +924,6 @@ int main(int argc, char *argv[])
                 T1.insere(v1[i]);
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = end - start;
-            std::cout << std::fixed << std::setprecision(6)<< "Tempo de inserção em T1: " << elapsed.count() << " segundos\n";
             
             std::cout << "\n";
             start = std::chrono::high_resolution_clock::now();  //medindo inserção T2
@@ -934,12 +931,13 @@ int main(int argc, char *argv[])
                 T2.insere(v2[i]);
             end = std::chrono::high_resolution_clock::now();
             elapsed = end - start;
-            std::cout << std::fixed << std::setprecision(6)<< "Tempo de inserção em T2: " << elapsed.count() << " segundos\n";
            
             std::cout << "T1:\n";
             T1.escreve("", T1.get_raiz());
+            std::cout << std::fixed << std::setprecision(6)<< "\nTempo de inserção em T1: " << elapsed.count() << " segundos\n";
             std::cout << "T2:\n";
             T2.escreve("", T2.get_raiz());
+            std::cout << std::fixed << std::setprecision(6)<< "\nTempo de inserção em T2: " << elapsed.count() << " segundos\n";
 
             break;
         }
